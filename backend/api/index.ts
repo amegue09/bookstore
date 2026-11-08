@@ -1,48 +1,26 @@
 import Fastify from 'fastify'
-import { Kysely, PostgresDialect } from 'kysely'
-import { Pool } from 'pg'
+import type { Kysely } from 'kysely'
+import { createDb } from '../db/config.js'
+import type { DB } from '../db/generated.js'
+import booksRoutes from './endpoints/books/books_get.js'
 
-interface Database {
-  // define your tables here
+declare module 'fastify' {
+  interface FastifyInstance {
+    db: Kysely<DB>
+  }
 }
 
-const fastify = Fastify({
-  logger: true 
-})
-
-const db = new Kysely<Database>({
-  dialect: new PostgresDialect({
-    pool: new Pool({
-      connectionString: process.env.DATABASE_URL,
-    }),
-  }),
-})
-
-// Decorate fastify instance
-fastify.decorate('db', db)
-
-// Close connection gracefully on shutdown
+const fastify = Fastify({ logger: true })
+fastify.decorate('db', createDb())
 fastify.addHook('onClose', async (instance) => {
   await instance.db.destroy()
 })
+fastify.register(booksRoutes)
 
-fastify.register(routes)
-
-
-const start = async () => {
-  try {
-    await fastify.listen({ port: 3000 })
-  } catch (err) {
-    fastify.log.error(err)
-    process.exit(1)
-  }
-}
-
-start()
-
-// TypeScript augmentation
-declare module 'fastify' {
-  interface FastifyInstance {
-    db: Kysely<Database>
-  }
+try {
+  await fastify.listen({ port: Number(process.env.PORT ?? 3000) })
+} catch (error) {
+  fastify.log.error(error)
+  await fastify.close()
+  process.exitCode = 1
 }

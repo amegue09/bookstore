@@ -15,12 +15,26 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:api": "node --env-file=.env --import tsx backend/api/index.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migrate": "node --env-file=.env --import tsx backend/db/migrate.ts",
+    "db:migrate:down": "node --env-file=.env --import tsx backend/db/migrate.ts down",
+    "db:types": "kysely-codegen --dialect=postgres --env-file=.env --out-file=backend/db/generated.ts",
+    "db:seed": "node --env-file=.env --import tsx backend/db/seed.ts"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
-    "typescript": "^7.0.2"
+    "eslint": "^10.14.0",
+    "kysely-codegen": "^0.20.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1"
   },
   "dependencies": {
     "fastify": "^5.12.8",

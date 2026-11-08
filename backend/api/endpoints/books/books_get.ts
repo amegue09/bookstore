@@ -1,54 +1,35 @@
-import { sql } from 'kysely'
+import type { FastifyPluginAsync } from 'fastify'
+import {
+  getAllBooks,
+  getBooksByGenre,
+  getBooksById,
+  getNewestBooks
+} from '../../../db/helpers/books.js'
 
-async function routes (fastify, options) {
-  fastify.get('/books', async (request, reply) => {
-    // identify a query param if it exists 
-    const {orderBy, genre, items} = request.query
-    // query db to get all the books
+interface BooksQuery {
+  genre?: string
+  items?: string
+  orderBy?: 'asc' | 'desc'
+}
+
+const booksRoutes: FastifyPluginAsync = async (fastify) => {
+  fastify.get<{ Querystring: BooksQuery }>('/books', async (request, reply) => {
+    const { genre, items, orderBy } = request.query
     try {
-      const getAllBooks = await fastify.db
-      .selectFrom('books')
-      .selectAll()
-      .execute()
-      // get books by genre
-      const getBooksByGenre = await fastify.db
-      .selectFrom('books')
-      .selectAll()
-      .where('genre', '=', genre)
-      .execute()
-      // get books by id
-      const getBooksById = await fastify.db
-      .selectFrom('books')
-      .selectAll()
-      .where('id', '=', items)
-      .execute()
-      // get books by newest date
-      const getNewestBooks = await fastify.db
-      .selectFrom('books')
-      .selectAll()
-      .where('date_added', '>=', sql`NOW() - INTERVAL '30 days'`)
-      .orderBy('date_added', orderBy)
-      .execute()
-
-      if (!request.query) {
-        reply.send(getAllBooks)
-        return 
-      } else if (orderBy) {
-        reply.send(getNewestBooks)
-        return
+      if (orderBy) {
+        return reply.send(await getNewestBooks(fastify.db, orderBy))
       } else if (genre) {
-        reply.send(getBooksByGenre)
-        return
+        return reply.send(await getBooksByGenre(fastify.db, genre))
       } else if (items) {
-        reply.send(getBooksById)
-        return
-      } 
-    } catch (err) {
-      console.log('/books failed. ERROR: ', err)
-      reply.status(500).message('unable to retreive books')
+        return reply.send(await getBooksById(fastify.db, items))
+      } else {
+        return reply.send(await getAllBooks(fastify.db))
+      }
+    } catch (error) {
+      request.log.error(error)
+      return reply.code(500).send({ error: 'Unable to retrieve books' })
     }
-    
   })
 }
 
-export default routes;
+export default booksRoutes
