@@ -1,0 +1,30 @@
+{
+  "name": "bookstore",
+  "version": "1.0.0",
+  "description": "Full stack bookstore app written in sveltekit and fastify",
+  "homepage": "https://github.com/amegue09/bookstore#readme",
+  "bugs": {
+    "url": "https://github.com/amegue09/bookstore/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amegue09/bookstore.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "fastify": "^5.12.8",
+    "kysely": "^0.29.8",
+    "pg": "^8.23.1"
+  }
+}
