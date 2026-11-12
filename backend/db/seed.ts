@@ -103,7 +103,7 @@ try {
         user_id: id(userBase, index % 40),
         date: date(2026, index % 10, (index % 28) + 1),
         total: cost.toFixed(2),
-        items: [{ book_id: id(bookBase, bookIndex), quantity: 1 }]
+        items: JSON.stringify([{ book_id: id(bookBase, bookIndex), quantity: 1 }])
       }
     })
     await trx
